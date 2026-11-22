@@ -50,11 +50,15 @@ runs at hand-written C speed.
 
 ## What is proved, and what is not
 
-`plan_eq` proves that on the **list model** of a table, `Db.plan n = Db.lastN n` for every table and every `n`.
-It has no hypothesis about the rowids.
+`plan_eq` proves that on the **list model** of a table, `Db.plan n = Db.lastN n`, **if the rowids are strictly
+increasing** (`Db.Sorted`). That is the one thing the proof takes from SQLite: a table B-tree keeps its leaf entries in
+rowid order, so the cursor visits the rows in order. The spec is written in terms of ids
+(`ORDER BY id DESC LIMIT n`), so it does not depend on how the list is laid out. Without `Sorted` the theorem is false:
+on ids `[5, 1]` with `n = 1`, the plan returns row 1 and the spec returns row 5. Gaps in the ids are fine.
 
 `Plan.planIO` is the same plan on the real cursor. It is **not** proved equal to `Db.plan`. The link is:
 
+- `Sorted` is assumed. Lean does not check that SQLite's B-tree has this property, and the test below is the evidence.
 - `planIO` is written to have the same shape as the model (`Last`, then `Previous`, stop after `n` rows).
 - `make test` compares it with SQLite's own answer on tables of 0 to 5,000 rows, with and without gaps in the rowids.
 
