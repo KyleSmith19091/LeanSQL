@@ -10,6 +10,7 @@ compiled to C by Lean, and linked against SQLite's *internal* B-tree API.
 src/Model.lean   the model, the spec and the proof (plan_eq). No SQLite here.
 src/Sqlite.lean  foreign functions: Handle.open / last / previous / rowid / body
 src/Plan.lean    the plan, running on a real cursor
+src/Bench.lean   benchmark driver: SQL engine vs B-tree, same rows, checksummed
 src/Main.lean    command line: leansql-demo <db> <table> <n>
 c/sqlite_shim.c  #includes the SQLite amalgamation, so the private B-tree functions are callable
 c/lean_ffi.c     Lean runtime glue (external object, IO results)
@@ -24,6 +25,7 @@ You need Lean 4 (via `elan`), a C compiler, `python3` and the `sqlite3` CLI (the
 make          # fetches + checks the SQLite amalgamation, builds build/leansql-demo
 make show     # Lean source of the plan next to the C that Lean generated
 make demo     # 100,000 rows: how many pages does the plan touch?
+make bench    # time the SQL engine against the B-tree paths (see BENCHMARKS.md)
 make test     # plan == SELECT ... ORDER BY id DESC LIMIT n, with and without rowid gaps
 ```
 
@@ -36,6 +38,13 @@ last 2000 rows: 26 page fetches
 ```
 
 Three fetches is the height of the tree: root, one interior page, one leaf. The 20 rows fit on the last leaf.
+
+## Does it beat SQL?
+
+Sometimes. Full numbers and caveats are in [BENCHMARKS.md](BENCHMARKS.md). In short: the plan's cost does not grow with the
+table, but for the last 20 rows SQL is about as fast as the B-tree once both pay for their own read transaction. The B-tree
+wins for large `n` (about 2.4 times at 2,000 rows), and by about 12 times if you keep the transaction open.
+The Lean layer in this demo is slower than SQL, because it allocates a lot per row.
 
 ## What is proved, and what is not
 

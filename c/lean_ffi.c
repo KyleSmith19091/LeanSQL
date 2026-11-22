@@ -36,3 +36,37 @@ LEAN_EXPORT lean_obj_res lsql_body(b_lean_obj_arg h, lean_obj_arg w) {
 LEAN_EXPORT lean_obj_res lsql_page_fetches(b_lean_obj_arg h, lean_obj_arg w) {
   (void)w; return lean_io_result_mk_ok(lean_uint64_to_nat(ldb_page_fetches(get(h))));
 }
+
+/* Benchmarks. The checksum comes back through a second, cheap call so that the
+ * timed loop itself stays inside C. Results: a Float (ns per query) or the checksum as a Nat. */
+LEAN_EXPORT lean_obj_res lsql_bench_sql(b_lean_obj_arg path, b_lean_obj_arg table, b_lean_obj_arg n,
+                                        uint8_t reprepare, double budgetNs, lean_obj_arg w) {
+  uint64_t sum = 0; (void)w;
+  double ns = ldb_bench_sql(lean_string_cstr(path), lean_string_cstr(table),
+                            lean_uint64_of_nat(n), reprepare, budgetNs, &sum);
+  return lean_io_result_mk_ok(lean_box_float(ns));
+}
+LEAN_EXPORT lean_obj_res lsql_check_sql(b_lean_obj_arg path, b_lean_obj_arg table, b_lean_obj_arg n, lean_obj_arg w) {
+  uint64_t sum = 0; (void)w;
+  ldb_bench_sql(lean_string_cstr(path), lean_string_cstr(table), lean_uint64_of_nat(n), 0, 0, &sum);
+  return lean_io_result_mk_ok(lean_uint64_to_nat(sum));
+}
+LEAN_EXPORT lean_obj_res lsql_bench_btree(b_lean_obj_arg path, b_lean_obj_arg table, b_lean_obj_arg n,
+                                          uint8_t txnPerQuery, double budgetNs, lean_obj_arg w) {
+  uint64_t sum = 0; (void)w;
+  double ns = ldb_bench_btree(lean_string_cstr(path), lean_string_cstr(table),
+                              lean_uint64_of_nat(n), txnPerQuery, budgetNs, &sum);
+  return lean_io_result_mk_ok(lean_box_float(ns));
+}
+LEAN_EXPORT lean_obj_res lsql_check_btree(b_lean_obj_arg path, b_lean_obj_arg table, b_lean_obj_arg n, lean_obj_arg w) {
+  uint64_t sum = 0; (void)w;
+  ldb_bench_btree(lean_string_cstr(path), lean_string_cstr(table), lean_uint64_of_nat(n), 0, 0, &sum);
+  return lean_io_result_mk_ok(lean_uint64_to_nat(sum));
+}
+
+LEAN_EXPORT lean_obj_res lsql_begin(b_lean_obj_arg h, lean_obj_arg w) {
+  (void)w; return lean_io_result_mk_ok(lean_box(ldb_begin(get(h))));
+}
+LEAN_EXPORT lean_obj_res lsql_end(b_lean_obj_arg h, lean_obj_arg w) {
+  (void)w; ldb_end(get(h)); return lean_io_result_mk_ok(lean_box(0));
+}
