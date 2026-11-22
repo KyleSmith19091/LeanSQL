@@ -15,7 +15,7 @@ extern "C" {
 #endif
 lean_object* l_Nat_reprFast(lean_object*);
 lean_object* lean_string_append(lean_object*, lean_object*);
-lean_object* l_IO_println___at___00benchDb_spec__0(lean_object*);
+lean_object* l_IO_println___at___00benchDb_spec__1(lean_object*);
 lean_object* l_IO_eprintln___at___00__private_Init_System_IO_0__IO_eprintlnAux_spec__0(lean_object*);
 lean_object* lean_string_utf8_byte_size(lean_object*);
 lean_object* l_String_Slice_toNat_x3f(lean_object*);
@@ -73,7 +73,7 @@ v___x_11_ = l_Nat_reprFast(v_id_8_);
 v___x_12_ = ((lean_object*)(l_List_forIn_x27_loop___at___00main_spec__0___redArg___closed__0));
 v___x_13_ = lean_string_append(v___x_11_, v___x_12_);
 v___x_14_ = lean_string_append(v___x_13_, v_body_9_);
-v___x_15_ = l_IO_println___at___00benchDb_spec__0(v___x_14_);
+v___x_15_ = l_IO_println___at___00benchDb_spec__1(v___x_14_);
 if (lean_obj_tag(v___x_15_) == 0)
 {
 lean_dec_ref_known(v___x_15_, 1);

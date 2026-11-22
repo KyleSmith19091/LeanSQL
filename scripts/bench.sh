@@ -11,7 +11,5 @@ for rows in 1000 100000 1000000; do
   echo
   echo "### $rows rows ($(sqlite3 "$DB" 'pragma page_count') pages)"
   echo
-  echo "| n | SQL (prepared) | SQL (prepare each time) | B-tree in C | B-tree via Lean | B-tree in C, txn kept open | B-tree via Lean, txn kept open |"
-  echo "|--:|--:|--:|--:|--:|--:|--:|"
   build/leansql-demo bench "$DB" posts "$MS"
 done

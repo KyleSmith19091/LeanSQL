@@ -30,3 +30,7 @@ opaque benchBtreeC (path table : @& String) (n : @& Nat) (txnPerQuery : Bool) (b
 /-- Checksum of the rows each C path returns: sum of `id + body length`. -/
 @[extern "lsql_check_sql"] opaque checkSql (path table : @& String) (n : @& Nat) : IO Nat
 @[extern "lsql_check_btree"] opaque checkBtreeC (path table : @& String) (n : @& Nat) : IO Nat
+/-- The loop printed by `Emit.lean`, compiled as C. -/
+@[extern "lsql_bench_emitted"]
+opaque benchEmitted (path table : @& String) (n : @& Nat) (txnPerQuery : Bool) (budgetNs : Float) : IO Float
+@[extern "lsql_check_emitted"] opaque checkEmitted (path table : @& String) (n : @& Nat) : IO Nat

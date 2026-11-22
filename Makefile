@@ -20,12 +20,16 @@ build/Bench.olean generated/Bench.c: src/Bench.lean build/Plan.olean
 generated/Main.c: src/Main.lean build/Bench.olean
 	lean --root=src -c generated/Main.c $<
 
+# Lean prints C for the plan (src/Emit.lean). The shim includes it.
+generated/plan_emit.c: src/Emit.lean
+	lean --run $< $@
+
 # SQLite amalgamation + shim: one translation unit, so the internal B-tree API is visible.
 $(SQLITE_DIR)/sqlite3.c:
 	scripts/fetch-sqlite.sh
 
-build/sqlite_shim.o: c/sqlite_shim.c c/shim.h $(SQLITE_DIR)/sqlite3.c
-	cc -O2 -I$(SQLITE_DIR) -Ic -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -w -c $< -o $@
+build/sqlite_shim.o: c/sqlite_shim.c c/shim.h generated/plan_emit.c $(SQLITE_DIR)/sqlite3.c
+	cc -O2 -I$(SQLITE_DIR) -Ic -Igenerated -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -w -c $< -o $@
 
 build/lean_ffi.o: c/lean_ffi.c c/shim.h
 	leanc -O2 -Ic -c $< -o $@

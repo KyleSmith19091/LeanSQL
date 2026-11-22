@@ -171,36 +171,59 @@ double ldb_bench_sql(const char *path, const char *table, uint64_t n, int reprep
 }
 
 /* The B-tree path from C: one Last, then Previous until n rows have been read. */
-static uint64_t btreeOnce(LDb *d, uint64_t n, int txnPerQuery) {
+static uint64_t btreeOnce(LDb *d, uint64_t n) {
   uint64_t sum = 0, k = n;
   size_t len;
-  if (txnPerQuery) ldb_begin(d);
-  if (n == 0 || !ldb_last(d)) { if (txnPerQuery) ldb_end(d); return 0; }
+  if (n == 0 || !ldb_last(d)) return 0;
   for (;;) {
     sum += (uint64_t)ldb_rowid(d);
     ldb_body(d, &len);
     sum += (uint64_t)len;
     if (--k == 0 || !ldb_previous(d)) break;
   }
-  if (txnPerQuery) ldb_end(d);
   return sum;
 }
 
-double ldb_bench_btree(const char *path, const char *table, uint64_t n, int txnPerQuery,
-                       double budgetNs, uint64_t *checksum) {
+/* The same loop, but printed by src/Emit.lean (make generates generated/plan_emit.c).
+ * It is included here so it shares a translation unit with the B-tree code, like btreeOnce. */
+#include "plan_emit.c"
+
+typedef uint64_t (*PlanFn)(LDb *, uint64_t);
+
+/* One benchmark loop for every B-tree path. always_inline lets the compiler see which
+ * function it is calling, so a path is not slowed down by an indirect call. */
+static inline __attribute__((always_inline))
+double benchLoop(const char *path, const char *table, uint64_t n, int txnPerQuery,
+                 double budgetNs, uint64_t *checksum, PlanFn fn) {
   const char *err = 0;
   LDb *d = ldb_open(path, table, &err);
   uint64_t iters = 0;
   double t0, t;
   if (!d) return -1;
-  *checksum = btreeOnce(d, n, txnPerQuery);                               /* warm-up */
+  if (txnPerQuery) ldb_begin(d);
+  *checksum = fn(d, n);                                      /* warm-up */
+  if (txnPerQuery) ldb_end(d);
   t0 = nowNs();
   do {
     int i;
-    for (i = 0; i < 8; i++) (void)btreeOnce(d, n, txnPerQuery);
+    for (i = 0; i < 8; i++) {
+      if (txnPerQuery) ldb_begin(d);
+      (void)fn(d, n);
+      if (txnPerQuery) ldb_end(d);
+    }
     iters += 8;
     t = nowNs() - t0;
   } while (t < budgetNs);
   ldb_close(d);
   return t / (double)iters;
+}
+
+double ldb_bench_btree(const char *path, const char *table, uint64_t n, int txnPerQuery,
+                       double budgetNs, uint64_t *checksum) {
+  return benchLoop(path, table, n, txnPerQuery, budgetNs, checksum, btreeOnce);
+}
+
+double ldb_bench_emitted(const char *path, const char *table, uint64_t n, int txnPerQuery,
+                         double budgetNs, uint64_t *checksum) {
+  return benchLoop(path, table, n, txnPerQuery, budgetNs, checksum, plan_last_n);
 }

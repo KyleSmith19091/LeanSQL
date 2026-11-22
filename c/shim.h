@@ -39,4 +39,6 @@ double ldb_bench_sql(const char *path, const char *table, uint64_t n, int reprep
                      double budgetNs, uint64_t *checksum);
 double ldb_bench_btree(const char *path, const char *table, uint64_t n, int txnPerQuery,
                        double budgetNs, uint64_t *checksum);
+double ldb_bench_emitted(const char *path, const char *table, uint64_t n, int txnPerQuery,
+                         double budgetNs, uint64_t *checksum);
 #endif

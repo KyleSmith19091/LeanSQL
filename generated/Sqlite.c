@@ -38,6 +38,10 @@ lean_object* lsql_check_sql(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_checkSql___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* lsql_check_btree(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_checkBtreeC___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* lsql_bench_emitted(lean_object*, lean_object*, lean_object*, uint8_t, double);
+LEAN_EXPORT lean_object* l_benchEmitted___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* lsql_check_emitted(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_checkEmitted___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
 static lean_object* _init_l_HandlePointed(void){
 _start:
 {
@@ -167,6 +171,31 @@ lean_dec(v_n_89_);
 lean_dec_ref(v_table_88_);
 lean_dec_ref(v_path_87_);
 return v_res_91_;
+}
+}
+LEAN_EXPORT lean_object* l_benchEmitted___boxed(lean_object* v_path_98_, lean_object* v_table_99_, lean_object* v_n_100_, lean_object* v_txnPerQuery_101_, lean_object* v_budgetNs_102_, lean_object* v_a_00___x40___internal___hyg_103_){
+_start:
+{
+uint8_t v_txnPerQuery_boxed_104_; double v_budgetNs_boxed_105_; lean_object* v_res_106_; 
+v_txnPerQuery_boxed_104_ = lean_unbox(v_txnPerQuery_101_);
+v_budgetNs_boxed_105_ = lean_unbox_float(v_budgetNs_102_);
+lean_dec_ref(v_budgetNs_102_);
+v_res_106_ = lsql_bench_emitted(v_path_98_, v_table_99_, v_n_100_, v_txnPerQuery_boxed_104_, v_budgetNs_boxed_105_);
+lean_dec(v_n_100_);
+lean_dec_ref(v_table_99_);
+lean_dec_ref(v_path_98_);
+return v_res_106_;
+}
+}
+LEAN_EXPORT lean_object* l_checkEmitted___boxed(lean_object* v_path_111_, lean_object* v_table_112_, lean_object* v_n_113_, lean_object* v_a_00___x40___internal___hyg_114_){
+_start:
+{
+lean_object* v_res_115_; 
+v_res_115_ = lsql_check_emitted(v_path_111_, v_table_112_, v_n_113_);
+lean_dec(v_n_113_);
+lean_dec_ref(v_table_112_);
+lean_dec_ref(v_path_111_);
+return v_res_115_;
 }
 }
 lean_object* initialize_Init(uint8_t builtin);
