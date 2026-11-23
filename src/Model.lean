@@ -59,9 +59,3 @@ theorem plan_eq (db : Db) (hs : db.Sorted) (n : Nat) : db.plan n = db.lastN n :=
   unfold Db.plan Db.lastN Db.walkBack
   rw [byIdDesc_eq db hs]
 
-/-! Without `Sorted` the theorem is false: on rows with ids `[5, 1]` and `n = 1`, the plan
-    returns row 1 and the spec returns row 5.
-
-    #eval ((Db.mk [⟨5, ""⟩, ⟨1, ""⟩]).plan 1).map (·.id)    -- [1]
-    #eval ((Db.mk [⟨5, ""⟩, ⟨1, ""⟩]).lastN 1).map (·.id)   -- [5]
--/
